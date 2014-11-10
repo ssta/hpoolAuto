@@ -1,0 +1,21 @@
+[{
+        "scriptPubKey": {
+            "addresses": ["pPwkUCB5HZrjC7M9F1c7DngdQJBkfkmzo3"],
+            "asm": "OP_DUP OP_HASH160 c9d466d6e95e7ba0d339deb58e55b9ade4a27f09 OP_EQUALVERIFY OP_CHECKSIG",
+            "hex": "76a914c9d466d6e95e7ba0d339deb58e55b9ade4a27f0988ac",
+            "type": "pubkeyhash",
+            "reqSigs": 1
+        },
+        "value": 100.607389,
+        "n": 0
+    }, {
+        "scriptPubKey": {
+            "addresses": ["pBhLfm9o7L4gB7oscgaJusRmv4JUb1Xwnk"],
+            "asm": "OP_DUP OP_HASH160 4379337ee1474e2883d3472be065a121a84d3234 OP_EQUALVERIFY OP_CHECKSIG",
+            "hex": "76a9144379337ee1474e2883d3472be065a121a84d323488ac",
+            "type": "pubkeyhash",
+            "reqSigs": 1
+        },
+        "value": 1,
+        "n": 1
+    }]
