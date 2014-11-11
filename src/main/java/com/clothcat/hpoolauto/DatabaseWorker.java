@@ -119,10 +119,28 @@ public class DatabaseWorker {
      *
      * @param amountToAdd How much to add to the current pool fill size.
      */
-    public void updateCurrPoolFill(int amountToAdd) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void updateCurrPoolFill(long amountToAdd) {
+        long curr_fill = getCurrPoolFill();
+        long new_fill = curr_fill+amountToAdd;
+        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
+        q.setParameter("key", "cur_fill");
+        Keyvalues row = (Keyvalues) q.getSingleResult();
+        row.setValue(String.valueOf(new_fill));
+        entityManager.getTransaction().begin();
+        entityManager.persist(row);
+        entityManager.getTransaction().commit();
     }
 
+    /** Retrieve how full the current pool is.
+     * 
+     * @return how full the current pool is
+     */
+    public long getCurrPoolFill(){
+        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
+        q.setParameter("key", "cur_fill");
+        Keyvalues row = (Keyvalues) q.getSingleResult();
+        return Long.valueOf(row.getValue());
+    }
     /**
      * Roll us over to the next pool. This assumes that the current pool is full
      * and has been marked as staking.

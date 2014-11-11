@@ -124,6 +124,11 @@ public class Main {
                 String sendingAddress = vout.getJSONObject(0).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
                 String receivingAddress = vout.getJSONObject(1).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
                 String amount = vout.getJSONObject(1).getString("value");
+                double d = Double.valueOf(amount);
+                d*=1000000;
+                long l = (long) d;
+                System.out.println("Updating fill amount by addingh "+l+" to it.  We received "+amount);
+                dw.updateCurrPoolFill(l);
                 dw.markTransactionDone(j);
             }
         } catch (JSONException ex) {
