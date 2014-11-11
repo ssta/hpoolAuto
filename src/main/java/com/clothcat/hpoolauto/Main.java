@@ -86,10 +86,9 @@ public class Main {
 
     private void processNewTx() {
         try {
-            int lastProcessed = DatabaseWorker.getLastTransactionNumber();
-            System.out.println("lastTransactionNumber=" + lastProcessed);
-            String s = rpcworker.getNextTransaction(POOL_ACCOUNT, lastProcessed);
-            System.out.println(s);
+            DatabaseWorker dw = new DatabaseWorker();
+            String s = rpcworker.getNextTransactions(POOL_ACCOUNT);
+            //System.out.println(s);
             //System.out.println(s);
             JSONArray ja = new JSONArray(s);
             for (int i = 0; i < ja.length(); i++) {
@@ -105,21 +104,27 @@ public class Main {
     }
 
     private void processReceipt(JSONObject j) {
+        DatabaseWorker dw = new DatabaseWorker();
+
         try {
-            // get the transaction for this receipt
-            String txid = j.getString("txid");
-            String s = rpcworker.getTransaction(txid);
+            if (dw.isNewTransaction(j)) {
+                System.out.println("new transaction!");
+                // get the transaction for this receipt
+                String txid = j.getString("txid");
+                String s = rpcworker.getTransaction(txid);
 
-            JSONTokener jt = new JSONTokener(s);
-            JSONObject tx = new JSONObjectDuplicates(jt);
-            JSONArray vout = tx.getJSONArray("vout");
+                JSONTokener jt = new JSONTokener(s);
+                JSONObject tx = new JSONObjectDuplicates(jt);
+                JSONArray vout = tx.getJSONArray("vout");
 
-            String sendingAddress = vout.getJSONObject(0).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
-            String receivingAddress = vout.getJSONObject(1).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
-            String amount = vout.getJSONObject(1).getString("value");
-            System.out.println("Sending address::" + sendingAddress);
-            System.out.println("Receiving address::" + receivingAddress);
-            System.out.println("Amount: " + amount);
+                String sendingAddress = vout.getJSONObject(0).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
+                String receivingAddress = vout.getJSONObject(1).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
+                String amount = vout.getJSONObject(1).getString("value");
+                System.out.println("Sending address::" + sendingAddress);
+                System.out.println("Receiving address::" + receivingAddress);
+                System.out.println("Amount: " + amount);
+                dw.markTransactionDone(j);
+            }
         } catch (JSONException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
