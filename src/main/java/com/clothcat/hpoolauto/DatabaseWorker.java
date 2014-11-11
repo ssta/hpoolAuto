@@ -47,6 +47,11 @@ public class DatabaseWorker {
         entityManager = emf.createEntityManager();
     }
 
+    /** Return the address of the pool.  This is the address people send Hyp to,
+     * NOT the address of any of the staking pools.
+     * 
+     * @return The pool address.
+     */
     public String getPoolAddress() {
         String result = "";
         Query q = entityManager.createNamedQuery("Addresses.findByAccount");
@@ -57,38 +62,69 @@ public class DatabaseWorker {
         return result;
     }
 
-    public void markTransactionDone(JSONObject jo) throws JSONException{
+    /**
+     * Grab the txid from the given JSONObject and mark it as having been
+     * processed.
+     */
+    public void markTransactionDone(JSONObject jo) throws JSONException {
         String txid = jo.getString("txid");
-        System.out.println("Trying to mark as done: "+txid);
+        System.out.println("Trying to mark as done: " + txid);
         Transactions t = new Transactions();
         t.setTxid(txid);
         entityManager.getTransaction().begin();
         entityManager.persist(t);
         entityManager.getTransaction().commit();
     }
-    
-    public int getLastTransactionNumber() {
-        int result = 0;
-        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
-        q.setParameter("key", "LASTTRANSACTION");
-        Keyvalues row;
-        try {
-            row = (Keyvalues) q.getSingleResult();
-        } catch (javax.persistence.NoResultException nre) {
-            row = new Keyvalues();
-            row.setKey("LASTTRANSACTION");
-            row.setValue("0");
-            entityManager.getTransaction().begin();
-            entityManager.persist(row);
-            entityManager.getTransaction().commit();
-            result = 0;
-        }
-        if (row != null) {
-            result = Integer.parseInt(row.getValue());
-        }
-        return result;
+
+    /**
+     * Returns the name of the pool we're currently trying to fill
+     *
+     * @return The pool name (eg: "pool1")
+     */
+    public String getCurrPoolName() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    /**
+     * Returns the minimum amount we need to add to fill the current pool
+     *
+     * @return The minimum amount needed in uHYP
+     */
+    public long getCurrPoolMinToFill() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Returns the maximum amount we need to add to fill the current pool before
+     * it overflows.
+     *
+     * @return The maximum amount allowed in uHYP
+     */
+    public String getCurrPoolMaxToFill() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Update the current idea of how full the pool is.
+     *
+     * @param amountToAdd How much to add to the current pool fill size.
+     */
+    public void updateCurrPoolFill(int amountToAdd) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Roll us over to the next pool. This assumes that the current pool is full
+     * and has been marked as staking.
+     */
+    public void nextPool() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Pulls the txid from the given JSONObject and returns true only if that
+     * txid is not marked as already processed.
+     */
     public boolean isNewTransaction(JSONObject j) throws JSONException {
         String txid = j.getString("txid");
         Query q = entityManager.createNamedQuery("Transactions.findByTxid");
