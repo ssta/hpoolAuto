@@ -110,7 +110,9 @@ public class Main {
             if (dw.isNewTransaction(j)) {
                 System.out.println("new transaction! "+j.getString("txid"));
                 String curPool = dw.getCurrPoolName();
-                System.out.println("Pool Name: " + curPool);
+                long tgt_min = dw.getCurrPoolMinToFill();
+                long tgt_max = dw.getCurrPoolMaxToFill();
+                System.out.println("Pool Name: " + curPool + "\ttgt_min: "+tgt_min+"\ttgt_max: "+tgt_max);
                 // get the transaction for this receipt
                 String txid = j.getString("txid");
                 String s = rpcworker.getTransaction(txid);

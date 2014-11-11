@@ -95,7 +95,10 @@ public class DatabaseWorker {
      * @return The minimum amount needed in uHYP
      */
     public long getCurrPoolMinToFill() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
+        q.setParameter("key", "tgt_min");
+        Keyvalues row = (Keyvalues) q.getSingleResult();
+        return Long.valueOf(row.getValue());
     }
 
     /**
@@ -104,8 +107,11 @@ public class DatabaseWorker {
      *
      * @return The maximum amount allowed in uHYP
      */
-    public String getCurrPoolMaxToFill() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public long getCurrPoolMaxToFill() {
+        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
+        q.setParameter("key", "tgt_max");
+        Keyvalues row = (Keyvalues) q.getSingleResult();
+        return Long.valueOf(row.getValue());
     }
 
     /**
