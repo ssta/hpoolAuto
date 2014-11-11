@@ -23,13 +23,16 @@
  */
 package com.clothcat.hpoolauto;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.clothcat.hpoolauto.entities.Addresses;
+import com.clothcat.hpoolauto.entities.Keyvalues;
+import com.clothcat.hpoolauto.entities.Transactions;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Utility class to abstract sqlite connectivity
@@ -37,58 +40,69 @@ import java.util.logging.Logger;
  */
 public class DatabaseWorker {
 
-    static Connection connection;
+    EntityManager entityManager;
 
-    static {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            // create tables if they don't already exist
-            String address_table_sql = "CREATE TABLE IF NOT EXISTS ADDRESSES "
-                    + "( ACCOUNT VARCHAR(10) PRIMARY KEY NOT NULL,"
-                    + " ADDRESS VARCHAR(40) )";
-            String keyvalues_table_sql = "CREATE TABLE IF NOT EXISTS KEYVALUES "
-                    + "( KEY VARCHAR(10) PRIMARY KEY NOT NULL,"
-                    + " VALUE VARCHAR(50) )";
-            try (Statement st = getConnection().createStatement()) {
-                st.executeUpdate(address_table_sql);
-                st.executeUpdate(keyvalues_table_sql);
-            }
-        } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(DatabaseWorker.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public DatabaseWorker() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hyp");
+        entityManager = emf.createEntityManager();
     }
 
-    private static Connection getConnection() {
-        if (connection == null) {
-            try {
-                connection = DriverManager.getConnection("jdbc:sqlite:/home/hyp/.hyperpool/hyperpool.db");
-            } catch (SQLException ex) {
-                Logger.getLogger(DatabaseWorker.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return connection;
+    public String getPoolAddress() {
+        String result = "";
+        Query q = entityManager.createNamedQuery("Addresses.findByAccount");
+        q.setParameter("account", "pool");
+        Addresses row;
+        row = (Addresses) q.getSingleResult();
+        result = row.getAddress();
+        return result;
     }
 
-    public static int getLastTransactionNumber() {
-        String result = null;
-        String sql = "SELECT value FROM KEYVALUES "
-                + "WHERE key='lasttx'";
-
+    public void markTransactionDone(JSONObject jo) throws JSONException{
+        String txid = jo.getString("txid");
+        System.out.println("Trying to mark as done: "+txid);
+        Transactions t = new Transactions();
+        t.setTxid(txid);
+        entityManager.getTransaction().begin();
+        entityManager.persist(t);
+        entityManager.getTransaction().commit();
+    }
+    
+    public int getLastTransactionNumber() {
+        int result = 0;
+        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
+        q.setParameter("key", "LASTTRANSACTION");
+        Keyvalues row;
         try {
-            try (Statement st = getConnection().createStatement()) {
-                ResultSet rs = st.executeQuery(sql);
-                if (rs.next()) {
-                    result = rs.getString("value");
-                }
-                if (result == null) {
-                    result = "0";
-                    String insertSql = "INSERT INTO KEYVALUES values('lasttx', '0')";
-                    st.executeUpdate(insertSql);
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DatabaseWorker.class.getName()).log(Level.SEVERE, null, ex);
+            row = (Keyvalues) q.getSingleResult();
+        } catch (javax.persistence.NoResultException nre) {
+            row = new Keyvalues();
+            row.setKey("LASTTRANSACTION");
+            row.setValue("0");
+            entityManager.getTransaction().begin();
+            entityManager.persist(row);
+            entityManager.getTransaction().commit();
+            result = 0;
         }
-        return Integer.valueOf(result);
+        if (row != null) {
+            result = Integer.parseInt(row.getValue());
+        }
+        return result;
+    }
+
+    public boolean isNewTransaction(JSONObject j) throws JSONException {
+        String txid = j.getString("txid");
+        Query q = entityManager.createNamedQuery("Transactions.findByTxid");
+        q.setParameter("txid", txid);
+        Transactions row;
+        try {
+            row = (Transactions) q.getSingleResult();
+            if (row == null) {
+                return true;
+            }
+        } catch (NoResultException nre) {
+            return true;
+        }
+
+        return false;
     }
 }
