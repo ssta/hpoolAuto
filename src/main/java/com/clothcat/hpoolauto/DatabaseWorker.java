@@ -47,9 +47,10 @@ public class DatabaseWorker {
         entityManager = emf.createEntityManager();
     }
 
-    /** Return the address of the pool.  This is the address people send Hyp to,
+    /**
+     * Return the address of the pool. This is the address people send Hyp to,
      * NOT the address of any of the staking pools.
-     * 
+     *
      * @return The pool address.
      */
     public String getPoolAddress() {
@@ -82,7 +83,10 @@ public class DatabaseWorker {
      * @return The pool name (eg: "pool1")
      */
     public String getCurrPoolName() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Query q = entityManager.createNamedQuery("Keyvalues.findByKey");
+        q.setParameter("key", "cur_pool");
+        Keyvalues row = (Keyvalues) q.getSingleResult();
+        return row.getValue();
     }
 
     /**

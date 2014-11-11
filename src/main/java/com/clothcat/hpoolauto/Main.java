@@ -108,7 +108,9 @@ public class Main {
 
         try {
             if (dw.isNewTransaction(j)) {
-                System.out.println("new transaction!");
+                System.out.println("new transaction! "+j.getString("txid"));
+                String curPool = dw.getCurrPoolName();
+                System.out.println("Pool Name: " + curPool);
                 // get the transaction for this receipt
                 String txid = j.getString("txid");
                 String s = rpcworker.getTransaction(txid);
@@ -120,9 +122,6 @@ public class Main {
                 String sendingAddress = vout.getJSONObject(0).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
                 String receivingAddress = vout.getJSONObject(1).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
                 String amount = vout.getJSONObject(1).getString("value");
-                System.out.println("Sending address::" + sendingAddress);
-                System.out.println("Receiving address::" + receivingAddress);
-                System.out.println("Amount: " + amount);
                 dw.markTransactionDone(j);
             }
         } catch (JSONException ex) {
