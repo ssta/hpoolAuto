@@ -35,7 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Utility class to abstract sqlite connectivity
+ * Utility class to abstract database connectivity
  *
  */
 public class DatabaseWorker {

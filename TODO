@@ -4,7 +4,8 @@ Add (and test) functionality to track pool fillage and create/transfer to a stak
 Add (and test) infrastructure to manage google docs spreadsheets.
 Make sure everything works on Windows.
 Add Javadoc after happy with refactoring.
-Change database stuff to use JPA rather than raw SQL.
 Write documentation on how to start qt wallet with server capability.
 Detect and handle stake payouts.
 WISHLIST: generate static html that can be easily published (phase 2 or 3)
+Find out how to estimate time to mint and add it to Pool datatype so it can be reported.
+Move to using JSON flatfiles rather than databases (not reasonable to expect users to admin a database for this)
