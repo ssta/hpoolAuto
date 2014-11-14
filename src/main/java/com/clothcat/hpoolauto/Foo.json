@@ -1,14 +1,102 @@
 {
-    "investments": [{
-            "datestamp": 1415838826084,
-            "amount": 1000,
-            "fromAddress": "A"
-        }, {
-            "datestamp": 1415838826084,
-            "amount": 2000,
-            "fromAddress": "B"
-        }],
-    "age": 0,
-    "poolName": "Pool1",
-    "status": {}
+    "txid": "3dfd277dc7ea05326165eaa2cf04c10845f6985dfd7be040c13ef875c0906827",
+    "version": 1,
+    "time": 1415868786,
+    "locktime": 0,
+    "vin": [
+        {
+            "txid": "2363fd16a937f29199cad8e4935fa683c656de941fb227303d9d7167c25feca4",
+            "vout": 1,
+            "scriptSig": {
+                "asm": "3045022100b276bff0f2f8a8f5a550afc94b75b77122529e3f5e96608ac0bec0227560485202203a8e5ce5c63c0d6b71cfc577b23face4aafc0748ce286b9d27927f8b14f5187901 0394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe",
+                "hex": "483045022100b276bff0f2f8a8f5a550afc94b75b77122529e3f5e96608ac0bec0227560485202203a8e5ce5c63c0d6b71cfc577b23face4aafc0748ce286b9d27927f8b14f5187901210394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe"
+            },
+            "sequence": 4294967295
+        },
+        {
+            "txid": "759a9cf1b1c92b8ba32df9195d483bd233b7e43abaae8854d342117d24f703a6",
+            "vout": 1,
+            "scriptSig": {
+                "asm": "304602210081531583a17831f8eface2fc5d07c443358e55f33f38bbe417a63113a5fc2ad8022100ccab93ccfacd802b591631a04d4c6be27691f3373a26f79cd3c05aa4eadffe4201 0394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe",
+                "hex": "49304602210081531583a17831f8eface2fc5d07c443358e55f33f38bbe417a63113a5fc2ad8022100ccab93ccfacd802b591631a04d4c6be27691f3373a26f79cd3c05aa4eadffe4201210394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe"
+            },
+            "sequence": 4294967295
+        },
+        {
+            "txid": "e2564df797698e8d6845a17e5cf9cec1258b0bef920b358e4d70cc40d45110d9",
+            "vout": 1,
+            "scriptSig": {
+                "asm": "3045022100a5dbf6ee1a61c998b53b78b025ecf0045a0b219c4c130c9c862c8309820f199302206d1fb8e888a0957900fddb58278836214a8df0754536ce53516d95387d0952fd01 0394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe",
+                "hex": "483045022100a5dbf6ee1a61c998b53b78b025ecf0045a0b219c4c130c9c862c8309820f199302206d1fb8e888a0957900fddb58278836214a8df0754536ce53516d95387d0952fd01210394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe"
+            },
+            "sequence": 4294967295
+        },
+        {
+            "txid": "f401f0403d32da4cd50faaf2b838e73da89397889ff1f9d214659c41c91f3e99",
+            "vout": 1,
+            "scriptSig": {
+                "asm": "30450220064e3ed1498055889c8689bbe3e0dbff036b227380e671bcfc8779ad0d626e200221008a5784667f958f805912a840546aa2f49bac865fd2f1186327a38ade9ea135db01 0394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe",
+                "hex": "4830450220064e3ed1498055889c8689bbe3e0dbff036b227380e671bcfc8779ad0d626e200221008a5784667f958f805912a840546aa2f49bac865fd2f1186327a38ade9ea135db01210394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe"
+            },
+            "sequence": 4294967295
+        },
+        {
+            "txid": "f403da09e75030b479343ab14b1d570eaff2005304ebcf652b9e01938dd5d6d9",
+            "vout": 1,
+            "scriptSig": {
+                "asm": "304402207b2f6c7219ef12e5711eb3944981a0f8f7030c81b4e4cd4931b173b9a93c538202201a6b355fa4a79af5e058fda5aa9e8c43387d5d7fbfc1803cbadd361ebb482d7501 0394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe",
+                "hex": "47304402207b2f6c7219ef12e5711eb3944981a0f8f7030c81b4e4cd4931b173b9a93c538202201a6b355fa4a79af5e058fda5aa9e8c43387d5d7fbfc1803cbadd361ebb482d7501210394a2b155a3a407877fb63eb06ea4bfd5a8a8702fd5eb7c0b381174b952058cbe"
+            },
+            "sequence": 4294967295
+        }
+    ],
+    "vout": [
+        {
+            "value": 0.68974000,
+            "n": 0,
+            "scriptPubKey": {
+                "asm": "OP_DUP OP_HASH160 134cc3e25d303737d64504f0577bacefec27b7a1 OP_EQUALVERIFY OP_CHECKSIG",
+                "hex": "76a914134cc3e25d303737d64504f0577bacefec27b7a188ac",
+                "reqSigs": 1,
+                "type": "pubkeyhash",
+                "addresses": [
+                    "p7Jd164QVhgjbQJhkffiv9iV2u4cwXuqaf"
+                ]
+            }
+        },
+        {
+            "value": 7.00000000,
+            "n": 1,
+            "scriptPubKey": {
+                "asm": "OP_DUP OP_HASH160 19dd13f918b9d9effe3b8c687a72a07b4c2e476e OP_EQUALVERIFY OP_CHECKSIG",
+                "hex": "76a91419dd13f918b9d9effe3b8c687a72a07b4c2e476e88ac",
+                "reqSigs": 1,
+                "type": "pubkeyhash",
+                "addresses": [
+                    "p7uKwGhFxNkd7kXGzCaRshZRYmT6s6wb2m"
+                ]
+            }
+        }
+    ],
+    "amount": 0.00000000,
+    "fee": -0.00001000,
+    "confirmations": 0,
+    "txid": "3dfd277dc7ea05326165eaa2cf04c10845f6985dfd7be040c13ef875c0906827",
+    "time": 1415868786,
+    "timereceived": 1415868786,
+    "details": [
+        {
+            "account": "pool",
+            "address": "p7uKwGhFxNkd7kXGzCaRshZRYmT6s6wb2m",
+            "category": "send",
+            "amount": -7.00000000,
+            "fee": -0.00001000
+        },
+        {
+            "account": "pool1",
+            "address": "p7uKwGhFxNkd7kXGzCaRshZRYmT6s6wb2m",
+            "category": "receive",
+            "amount": 7.00000000
+        }
+    ]
 }

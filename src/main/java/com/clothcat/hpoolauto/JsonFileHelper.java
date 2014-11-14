@@ -43,11 +43,9 @@ import org.json.JSONTokener;
  */
 public class JsonFileHelper {
 
-    private static final String FILEPATH = System.getProperty("user.home") + "/.Hyperpool/JSON/";
-
     public static JSONObject readFromFile(String filename) {
         try {
-            File f = new File(FILEPATH + filename);
+            File f = new File(Constants.JSON_FILEPATH + filename);
             JSONArray ja = new JSONArray(new JSONTokener(new FileReader(f)));
             // the actual JSONObject we want is element 3 since there are three 
             // lines of comment that start the array
@@ -70,9 +68,9 @@ public class JsonFileHelper {
         String s = ja.toString();
         s = prettify(s);
 
-        File f = new File(FILEPATH);
+        File f = new File(Constants.JSON_FILEPATH);
         f.mkdirs();
-        f = new File(FILEPATH + filename);
+        f = new File(Constants.JSON_FILEPATH + filename);
         try (PrintWriter p = new PrintWriter(f)) {
             p.println(s);
         } catch (FileNotFoundException ex) {
@@ -86,13 +84,13 @@ public class JsonFileHelper {
 
     public static void main(String[] args) throws JSONException {
         String s = "{\"poolAddress\":\"PADDA\",\"investments\":[{\"datestamp\":1415838826084,\"amount\":1000,\"fromAddress\":\"A\"},{\"datestamp\":1415838826084,\"amount\":2000,\"fromAddress\":\"B\"}],\"startTimestamp\":0,\"poolName\":\"Pool1\",\"status\":\"FILLING\"}";
-        s=prettify(s);
+        s = prettify(s);
         JSONObject jo = new JSONObject(s);
         writeToFile(jo, "foo.json");
         // read the file back again!
         JSONObject jo2 = readFromFile("foo.json");
         System.out.println(s);
-        String s2=prettify(jo2.toString());
+        String s2 = prettify(jo2.toString());
         System.out.println(s2);
         System.out.println(s.equals(s2));
     }
