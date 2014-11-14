@@ -54,7 +54,7 @@ public class RpcWorker {
 
         return runCommand(cmd);
     }
-    
+
     public String getTransaction(String txid) {
         List<String> cmd = new ArrayList<>();
         cmd.addAll(Arrays.asList(cmdline));
@@ -64,7 +64,9 @@ public class RpcWorker {
         return runCommand(cmd);
     }
 
-    /** Grab up to the last 20 transactions */
+    /**
+     * Grab up to the last 20 transactions
+     */
     public String getNextTransactions(String account) {
         List<String> cmd = new ArrayList<>();
         cmd.addAll(Arrays.asList(cmdline));
@@ -72,6 +74,14 @@ public class RpcWorker {
         cmd.add(account);
         cmd.add("20");
         cmd.add(String.valueOf(0));
+
+        return runCommand(cmd);
+    }
+
+    public String getPosDifficulty() {
+        List<String> cmd = new ArrayList<>();
+        cmd.addAll(Arrays.asList(cmdline));
+        cmd.add("getdifficulty");
 
         return runCommand(cmd);
     }

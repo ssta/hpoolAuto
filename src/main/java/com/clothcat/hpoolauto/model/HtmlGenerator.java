@@ -24,15 +24,16 @@
 package com.clothcat.hpoolauto.model;
 
 import com.clothcat.hpoolauto.Constants;
+import com.clothcat.hpoolauto.RpcWorker;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Generates static HTML pages displaying the current state of the pools. The
@@ -63,6 +64,9 @@ public class HtmlGenerator {
             + "            <!--NUM_POOLS_PAID--> pools staked and paid out.</br>\n"
             + "            <!--TOTAL_PROFIT_AMOUNT--> total profit so far.</div>\n"
             + "\n"
+            + "<div id=\"network_stats\">\n"
+            + "Current difficulty: <!--CURRENT_DIFFICULTY--><br/>\n"
+            + "</div>\n"
             + "        <div id=\"master_pool_table\">\n"
             + "            <!--MASTER_POOL_TABLE-->\n"
             + "        </div>\n"
@@ -96,10 +100,25 @@ public class HtmlGenerator {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm z yyyy/MM/dd");
         template = template.replace(PlaceholderStrings.DATE_GENERATED, sdf.format(new Date()));
         // number of filled pools
+        template = template.replace(PlaceholderStrings.NUM_FILLED_POOLS, String.valueOf(Model.getInstance().getNumFilledPools()));
         // number of pools maturing
+        template = template.replace(PlaceholderStrings.NUM_POOLS_MATURING, String.valueOf(Model.getInstance().getNumMaturingPools()));
         // number of paid pools
+        template = template.replace(PlaceholderStrings.NUM_POOLS_PAID, String.valueOf(Model.getInstance().getNumPoolsPaid()));
         // number or pools staking
+        template = template.replace(PlaceholderStrings.NUM_POOLS_STAKING, String.valueOf(Model.getInstance().getNumStakingPools()));
+        // pools paid out
+        template = template.replace(PlaceholderStrings.NUM_POOLS_PAID, String.valueOf(Model.getInstance().getNumPoolsPaid()));
         // total profit
+        template = template.replace(PlaceholderStrings.TOTAL_PROFIT, String.valueOf(Model.getInstance().getTotalProfit() / 1000000));
+        // difficulty
+        try {
+            JSONObject diffJo = new JSONObject(new RpcWorker().getPosDifficulty());
+            String diff = diffJo.getString("proof-of-stake");
+            template = template.replace(PlaceholderStrings.CURRENT_DIFFICULTY, diff);
+        } catch (JSONException ex) {
+            Logger.getLogger(HtmlGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
         // master pool table
         // write file
         // make sure target directory exists
@@ -138,7 +157,7 @@ public class HtmlGenerator {
         /**
          * Number of pools which have staked and paid out
          */
-        public static final String NUM_POOLS_PAID = "< !--NUM_POOLS_PAID-- >";
+        public static final String NUM_POOLS_PAID = "<!--NUM_POOLS_PAID-->";
         /**
          * total profit so far
          */
@@ -147,6 +166,10 @@ public class HtmlGenerator {
          * The master table with information and links to the pool pages
          */
         public static final String MASTER_POOL_TABLE = "<!--MASTER_POOL_TABLE-->";
+        /**
+         * current POS difficulty
+         */
+        public static final String CURRENT_DIFFICULTY = "<!--CURRENT_DIFFICULTY-->";
     }
 //</editor-fold>
 }
