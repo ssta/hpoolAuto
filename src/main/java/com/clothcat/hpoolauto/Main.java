@@ -23,16 +23,11 @@
  */
 package com.clothcat.hpoolauto;
 
-import com.clothcat.hpoolauto.model.Investment;
 import com.clothcat.hpoolauto.model.Model;
-import com.clothcat.hpoolauto.model.Pool;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  *

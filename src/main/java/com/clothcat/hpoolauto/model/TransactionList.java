@@ -46,7 +46,17 @@ public class TransactionList {
     }
 
     public void saveTransactions(){
-        JsonFileHelper.writeToFile(new JSONObject(this), "transactions.json");
+        try {
+            JSONObject jo = new JSONObject();
+            JSONArray ja = new JSONArray();
+            for(String t : txids){
+                ja.put(t);
+            }
+            jo.put("txids", ja);
+            JsonFileHelper.writeToFile(jo, "transactions.json");
+        } catch (JSONException ex) {
+            Logger.getLogger(TransactionList.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public TransactionList(JSONObject jo) {

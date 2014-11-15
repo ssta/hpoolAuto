@@ -75,7 +75,36 @@ public class HtmlGenerator {
             + "</html>\n"
             + "";
 //</editor-fold>
-
+    //<editor-fold defaultstate="collapsed" desc="POOL_HTML">
+    private static final String POOL_HTML_TEMPLATE = "<html>\n"
+            + "    <head>\n"
+            + "        <title>Hyperpool</title>\n"
+            + "        <meta charset=\"UTF-8\">\n"
+            + "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+            + "        <!--CSS-->\n"
+            + "    </head>\n"
+            + "    <body>\n"
+            + "        <div id=\"hat_header\"><p>This page was automatically generated the by the Hyperpool Automation Tool (HAT)</p>\n"
+            + "            <p>Generated at: <!--CREATION_DATE--></p></div>\n"
+            + "\n"
+            + "        <div id=\"current_status\">\n"
+            + "            <!--NUM_FILLED_POOLS--> pools filled.<br/>\n"
+            + "            <!--NUM_POOLS_MATURING--> pools currently maturing.<br/>\n"
+            + "            <!--NUM_POOLS_STAKING--> pools currently staking.<br/>\n"
+            + "            <!--NUM_POOLS_PAID--> pools staked and paid out.</br>\n"
+            + "            <!--TOTAL_PROFIT_AMOUNT--> total profit so far.</div>\n"
+            + "\n"
+            + "<div id=\"network_stats\">\n"
+            + "Current difficulty: <!--CURRENT_DIFFICULTY--><br/>\n"
+            + "</div>\n"
+            + "        <div id=\"master_pool_table\">\n"
+            + "            <!--MASTER_POOL_TABLE-->\n"
+            + "        </div>\n"
+            + "\n"
+            + "    </body>\n"
+            + "</html>\n"
+            + "";
+//</editor-fold>
 
     public static void generateAll(Model m) {
         try {
@@ -113,6 +142,28 @@ public class HtmlGenerator {
             Logger.getLogger(HtmlGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
         // master pool table
+        String poolTable = "<table id=\"pool_table\" border=\"1\">\n"
+                + "<tr id=\"pool_table_header\">\n"
+                + "<th>Pool Name</td>\n"
+                + "<th>Pool Size</td>\n"
+                + "<th>Pool Status</td>\n"
+                + "</tr>\n";
+        int rownum = 0;
+        for (Pool pool : model.pools) {
+            if (rownum % 2 == 0) {
+                poolTable += "<tr id=\"pool_table_oddrow\">\n";
+            } else {
+                poolTable += "<tr id=\"pool_table_evenrow\">\n";
+            }
+            rownum++;
+            poolTable += "<td>" + pool.getPoolName() + "</td>\n"
+                    + "<td>" + pool.calculateFillAmount() / Constants.uH + "</td>\n"
+                    + "<td>" + pool.getStatus().name() + "</td>\n"
+                    + "</td>\n"
+                    + "</tr>\n";
+        }
+        poolTable += "</table>\n";
+        template = template.replace(PlaceholderStrings.MASTER_POOL_TABLE, poolTable);
         // write file
         // make sure target directory exists
         File d = new File(Constants.HTML_FILEPATH);
@@ -121,7 +172,7 @@ public class HtmlGenerator {
     }
 
     private static void generatePools(Model model) {
-        
+
     }
 
     private static void copyStylesheet() {

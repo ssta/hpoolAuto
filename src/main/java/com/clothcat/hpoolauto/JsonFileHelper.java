@@ -85,17 +85,4 @@ public class JsonFileHelper {
     public static String prettify(String json) {
         return new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(json));
     }
-
-    public static void main(String[] args) throws JSONException {
-        String s = "{\"poolAddress\":\"PADDA\",\"investments\":[{\"datestamp\":1415838826084,\"amount\":1000,\"fromAddress\":\"A\"},{\"datestamp\":1415838826084,\"amount\":2000,\"fromAddress\":\"B\"}],\"startTimestamp\":0,\"poolName\":\"Pool1\",\"status\":\"FILLING\"}";
-        s = prettify(s);
-        JSONObject jo = new JSONObject(s);
-        writeToFile(jo, "foo.json");
-        // read the file back again!
-        JSONObject jo2 = readFromFile("foo.json");
-        System.out.println(s);
-        String s2 = prettify(jo2.toString());
-        System.out.println(s2);
-        System.out.println(s.equals(s2));
-    }
 }

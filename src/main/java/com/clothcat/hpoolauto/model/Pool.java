@@ -36,19 +36,19 @@ import org.json.JSONObject;
  *
  */
 public class Pool {
-
+    
     private List<Investment> investments = new ArrayList<>();
     private String poolName;
     private PoolStatus status;
     private String poolAddress;
     private long poolAge;
     private long startTimestamp; /* The timestamp that the pool started maturing */
-
+    
     private long profit = 0;
-
-    private Pool() {
+    
+    public Pool() {
     }
-
+    
     public Pool(JSONObject jo) throws JSONException {
         JSONArray ja = jo.getJSONArray("investments");
         for (int i = 0; i < ja.length(); i++) {
@@ -57,7 +57,9 @@ public class Pool {
         }
         poolName = jo.getString("poolName");
         status = PoolStatus.valueOf(jo.getString("status"));
-        poolAddress = jo.getString("poolAddress");
+        if (jo.has("poolAddress")) {
+            poolAddress = jo.getString("poolAddress");
+        }
         startTimestamp = jo.getLong("startTimestamp");
         poolAge = jo.getLong("poolAge");
         profit = jo.getLong("profit");
@@ -104,7 +106,7 @@ public class Pool {
     public void setStatus(PoolStatus status) {
         this.status = status;
     }
-
+    
     public JSONObject toJson() {
         JSONObject jo = new JSONObject(this);
         try {
@@ -193,7 +195,7 @@ public class Pool {
         if (potStake > MAXSTAKE) {
             potStake = MAXSTAKE;
         }
-
+        
         return potStake;
     }
 

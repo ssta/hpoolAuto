@@ -62,6 +62,7 @@ public class RpcWorker {
         cmd.add("getaccountaddress");
         cmd.add(poolName);
         String s = runCommand(cmd);
+        System.out.println("Got address: "+s+" for pool address");
         return s;
     }
 

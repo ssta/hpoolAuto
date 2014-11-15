@@ -53,7 +53,7 @@ public class Model {
     private long minInvestment;
     private long minFill;
     private long maxFill;
-    private String poolAddress = rpcWorker.getPoolAddress("pool");
+    private String poolAddress;
     TransactionList transactions;
 
     public Model() {
@@ -66,7 +66,7 @@ public class Model {
             if (jo.has("pools")) {
                 JSONArray parray = jo.getJSONArray("pools");
                 for (int i = 0; i < parray.length(); i++) {
-                    Pool p = new Pool(JsonFileHelper.readFromFile(parray.getString(i)));
+                    Pool p = new Pool(JsonFileHelper.readFromFile(parray.getString(i) + ".json"));
                     pools.add(p);
                 }
             }
@@ -90,6 +90,11 @@ public class Model {
             } else {
                 // default to 4000 HYP
                 maxFill = 4000 * Constants.uH;
+            }
+            if (jo.has("poolAddress")) {
+                poolAddress = jo.getString("poolAddress");
+            } else {
+                poolAddress = rpcWorker.getPoolAddress("pool");
             }
             transactions = new TransactionList();
         } catch (JSONException ex) {
@@ -195,7 +200,6 @@ public class Model {
     public void processNewTx() {
         try {
             String s = rpcWorker.getNextTransactions("pool");
-            System.out.println(s);
             JSONArray ja = new JSONArray(s);
             for (int i = 0; i < ja.length(); i++) {
                 JSONObject jo = ja.getJSONObject(i);
@@ -284,6 +288,9 @@ public class Model {
      * @return the currPoolName
      */
     public String getCurrPoolName() {
+        if (currPoolName == null) {
+            currPoolName = "pool1";
+        }
         return currPoolName;
     }
 
@@ -300,7 +307,15 @@ public class Model {
                 return p;
             }
         }
-        return null;
+
+        // if we got here that means there isn't a current pool generated yet :(
+        Pool p = new Pool();
+        p.setPoolName(poolName);
+        p.setPoolAge(0);
+        p.setProfit(0);
+        p.setStatus(PoolStatus.FILLING);
+        pools.add(p);
+        return p;
     }
 
     public void updateAndSave() {
@@ -316,7 +331,7 @@ public class Model {
         // write all pools to JSON
         for (Pool p : pools) {
             JSONObject j = p.toJson();
-            JsonFileHelper.writeToFile(j, p.getPoolName());
+            JsonFileHelper.writeToFile(j, p.getPoolName() + ".json");
         }
         transactions.saveTransactions();
     }
@@ -331,8 +346,6 @@ public class Model {
             JSONArray poolsArray = new JSONArray();
             for (Pool p : pools) {
                 poolsArray.put(p.getPoolName());
-                // save the pool json while we're at it
-                JsonFileHelper.writeToFile(p.toJson(), p.getPoolName() + ".json");
             }
             jo.put("pools", poolsArray);
         } catch (JSONException ex) {
