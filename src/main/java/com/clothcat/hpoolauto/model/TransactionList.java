@@ -45,6 +45,10 @@ public class TransactionList {
         this(JsonFileHelper.readFromFile("transactions.json"));
     }
 
+    public void saveTransactions(){
+        JsonFileHelper.writeToFile(new JSONObject(this), "transactions.json");
+    }
+    
     public TransactionList(JSONObject jo) {
         txids = new TreeSet<>();
         try {

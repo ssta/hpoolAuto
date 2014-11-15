@@ -33,7 +33,7 @@ import org.json.JSONTokener;
  */
 public class JSONObjectDuplicates extends JSONObject {
 
-    JSONObjectDuplicates(JSONTokener jt) throws JSONException {
+    public JSONObjectDuplicates(JSONTokener jt) throws JSONException {
         super(jt);
     }
 

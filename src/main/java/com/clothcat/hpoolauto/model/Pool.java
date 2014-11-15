@@ -37,20 +37,19 @@ import org.json.JSONObject;
  */
 public class Pool {
 
-    private List<Investment> investments;
+    private List<Investment> investments = new ArrayList<>();
     private String poolName;
     private PoolStatus status;
     private String poolAddress;
     private long poolAge;
     private long startTimestamp; /* The timestamp that the pool started maturing */
 
+    private long profit = 0;
 
     private Pool() {
-        //    throw new UnsupportedOperationException("Use Pool(JsonObject) instead");
     }
 
     public Pool(JSONObject jo) throws JSONException {
-        investments = new ArrayList<>();
         JSONArray ja = jo.getJSONArray("investments");
         for (int i = 0; i < ja.length(); i++) {
             Investment inv = new Investment(ja.getJSONObject(i));
@@ -61,6 +60,7 @@ public class Pool {
         poolAddress = jo.getString("poolAddress");
         startTimestamp = jo.getLong("startTimestamp");
         poolAge = jo.getLong("poolAge");
+        profit = jo.getLong("profit");
     }
 
     /**
@@ -195,5 +195,19 @@ public class Pool {
         }
 
         return potStake;
+    }
+
+    /**
+     * @return the profit
+     */
+    public long getProfit() {
+        return profit;
+    }
+
+    /**
+     * @param profit the profit to set
+     */
+    public void setProfit(long profit) {
+        this.profit = profit;
     }
 }

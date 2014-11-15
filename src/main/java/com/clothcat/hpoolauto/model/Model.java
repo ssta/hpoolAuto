@@ -24,15 +24,19 @@
 package com.clothcat.hpoolauto.model;
 
 import com.clothcat.hpoolauto.Constants;
+import com.clothcat.hpoolauto.JSONObjectDuplicates;
 import com.clothcat.hpoolauto.JsonFileHelper;
+import com.clothcat.hpoolauto.Main;
 import com.clothcat.hpoolauto.RpcWorker;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 /**
  * The Model consists of several pools in various stages.
@@ -49,6 +53,8 @@ public class Model {
     private long minInvestment;
     private long minFill;
     private long maxFill;
+    private String poolAddress = rpcWorker.getPoolAddress("pool");
+    TransactionList transactions;
 
     public Model() {
         this(JsonFileHelper.readFromFile("model.json"));
@@ -85,10 +91,123 @@ public class Model {
                 // default to 4000 HYP
                 maxFill = 4000 * Constants.uH;
             }
-
+            transactions = new TransactionList();
         } catch (JSONException ex) {
             Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    boolean isNewTransaction(JSONObject j) {
+        boolean result = false;
+        try {
+            String txid = j.getString("txid");
+            result = !transactions.getTxids().contains(txid);
+        } catch (JSONException ex) {
+            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+    }
+
+    private void processReceipt(JSONObject j) {
+        try {
+            if (isNewTransaction(j)) {
+                System.out.println("new transaction! " + j.getString("txid"));
+                // get the transaction for this receipt
+                String txid = j.getString("txid");
+                String s = rpcWorker.getTransaction(txid);
+
+                JSONTokener jt = new JSONTokener(s);
+                JSONObject tx = new JSONObjectDuplicates(jt);
+                JSONArray vout = tx.getJSONArray("vout");
+
+                String sendingAddress = vout.getJSONObject(0).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
+                String receivingAddress = vout.getJSONObject(1).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
+                String amountStr = vout.getJSONObject(1).getString("value");
+                double d = Double.valueOf(amountStr);
+                d *= Constants.uH;
+                long amount = (long) d;
+
+                Pool p = getPool(getCurrPoolName());
+                long minSpace = getMinFill() - p.calculateFillAmount();
+                long maxSpace = getMaxFill() - p.calculateFillAmount();
+
+                if (amount < minSpace) {
+                    // investment fits in pool but does not fill it
+                    Investment inv = new Investment();
+                    inv.setAmount(amount);
+                    inv.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv.setFromAddress(sendingAddress);
+                    p.getInvestments().add(inv);
+                } else if (amount < maxSpace) {
+                    // investment fits in pool and fills it
+                    Investment inv = new Investment();
+                    inv.setAmount(amount);
+                    inv.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv.setFromAddress(sendingAddress);
+                    p.getInvestments().add(inv);
+                    moveToNextPool();
+                } else {
+                    // investment overflows pool, so fill it and then rollover
+                    // what's left as the first investment in the next pool.
+
+                    // we want to take a random amount of investment that
+                    // lets the pool size be between min and max, but which 
+                    // still leaves the investor enough for the minimum 
+                    // investment for the next pool.
+                    long maxInvAmount = amount - getMinInvestment();
+                    long minInvAmount = minSpace;
+
+                    long randomAmount = getRandomLongInRange(minInvAmount, maxInvAmount);
+                    long remainingAmount = amount - randomAmount;
+
+                    Investment inv = new Investment();
+                    inv.setAmount(randomAmount);
+                    inv.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv.setFromAddress(sendingAddress);
+                    p.getInvestments().add(inv);
+                    moveToNextPool();
+
+                    Pool p2 = getPool(getCurrPoolName());
+                    Investment inv2 = new Investment();
+                    inv2.setAmount(remainingAmount);
+                    inv2.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv2.setFromAddress(sendingAddress);
+                    p2.getInvestments().add(inv2);
+                }
+
+                setTransactionDone(txid);
+            }
+        } catch (JSONException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private long getRandomLongInRange(long from, long to) {
+        long range = to - from + 1;
+        long r = new Random().nextLong();
+        r %= range;
+        // we only produce positive values
+        r = Math.abs(r);
+        r += from;
+        return r;
+    }
+
+    public void processNewTx() {
+        try {
+            String s = rpcWorker.getNextTransactions("pool");
+            System.out.println(s);
+            JSONArray ja = new JSONArray(s);
+            for (int i = 0; i < ja.length(); i++) {
+                JSONObject jo = ja.getJSONObject(i);
+                //System.out.println(jo.toString());
+                if (jo.getString("category").equals("receive")) {
+                    processReceipt(jo);
+                }
+            }
+        } catch (JSONException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -96,7 +215,14 @@ public class Model {
      * @return The number of pools we've ever filled.
      */
     public int getNumFilledPools() {
-        return 10;
+        int num = 0;
+        for (Pool p : pools) {
+            PoolStatus status = p.getStatus();
+            if (status == PoolStatus.MATURING || status == PoolStatus.STAKED || status == PoolStatus.STAKING) {
+                num++;
+            }
+        }
+        return num;
     }
 
     /**
@@ -104,7 +230,14 @@ public class Model {
      * yet old enough to be eligible for stake)
      */
     public int getNumMaturingPools() {
-        return 5;
+        int num = 0;
+        for (Pool p : pools) {
+            PoolStatus status = p.getStatus();
+            if (status == PoolStatus.MATURING) {
+                num++;
+            }
+        }
+        return num;
     }
 
     /**
@@ -112,21 +245,39 @@ public class Model {
      * which haven't yet staked.
      */
     public int getNumStakingPools() {
-        return 2;
+        int num = 0;
+        for (Pool p : pools) {
+            PoolStatus status = p.getStatus();
+            if (status == PoolStatus.STAKING) {
+                num++;
+            }
+        }
+        return num;
     }
 
     /**
      * @return How many pools have staked and been paid out.
      */
     public int getNumPoolsPaid() {
-        return 3;
+        int num = 0;
+        for (Pool p : pools) {
+            PoolStatus status = p.getStatus();
+            if (status == PoolStatus.STAKED) {
+                num++;
+            }
+        }
+        return num;
     }
 
     /**
      * @return How much profit we've made for investors thus far (in uHyp)
      */
     public long getTotalProfit() {
-        return 1234123400L;
+        long total = 0;
+        for (Pool p : pools) {
+            total += p.getProfit();
+        }
+        return total;
     }
 
     /**
@@ -152,8 +303,22 @@ public class Model {
         return null;
     }
 
+    public void updateAndSave() {
+        // update webpages
+        HtmlGenerator.generateAll(this);
+        // save everything
+        saveJson();
+    }
+
     public void saveJson() {
+        // write self to JSON
         JsonFileHelper.writeToFile(toJson(), "model.json");
+        // write all pools to JSON
+        for (Pool p : pools) {
+            JSONObject j = p.toJson();
+            JsonFileHelper.writeToFile(j, p.getPoolName());
+        }
+        transactions.saveTransactions();
     }
 
     public JSONObject toJson() {
@@ -222,7 +387,7 @@ public class Model {
         Pool oldPool = getPool(getCurrPoolName());
 
         // generate new pool name
-        // pool names are "poolN" where N is an incremebting number
+        // pool names are "poolN" where N is an incrementing number
         int oldNumber = Integer.parseInt(getCurrPoolName().substring(4));
         int newNumber = oldNumber + 1;
         String newPoolName = "pool" + newNumber;
@@ -233,19 +398,19 @@ public class Model {
         // generate a new address for the now full pool
         String newAddress = rpcWorker.getNewAddress(newPoolName);
         oldPool.setPoolAddress(newAddress);
-        
+
         // xfer into the now full pool
         rpcWorker.xferCoins("pool", newAddress, oldPool.calculateFillAmount());
-        // update webpages
-        HtmlGenerator.generateAll();
+
         // set currentpool to new pool
         setCurrPoolName(newPoolName);
-        // save all json
-        // TODO
-        TODO;
+
+        // update and save all
+        updateAndSave();
     }
 
     public void setTransactionDone(String txid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        transactions.getTxids().add(txid);
+        transactions.saveTransactions();
     }
 }

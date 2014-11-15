@@ -76,26 +76,18 @@ public class HtmlGenerator {
             + "";
 //</editor-fold>
 
-    public static void main(String[] args) {
-        try {
-            generateMaster();
-        } catch (IOException ex) {
-            Logger.getLogger(HtmlGenerator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 
-    public static void generateAll() {
+    public static void generateAll(Model m) {
         try {
-            generateMaster();
-            generatePools();
+            generateMaster(m);
+            generatePools(m);
             copyStylesheet();
         } catch (IOException ex) {
             Logger.getLogger(HtmlGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private static void generateMaster() throws IOException {
-        Model model = new Model();
+    private static void generateMaster(Model model) throws IOException {
         String template = MASTER_HTML_TEMPLATE;
         // date generated
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm z yyyy/MM/dd");
@@ -128,12 +120,11 @@ public class HtmlGenerator {
         FileUtils.write(new File(Constants.HTML_FILEPATH + "master.html"), template);
     }
 
-    private static void generatePools() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private static void generatePools(Model model) {
+        
     }
 
     private static void copyStylesheet() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     //<editor-fold defaultstate="collapsed" desc="List of placeholder strings to be replaced">
