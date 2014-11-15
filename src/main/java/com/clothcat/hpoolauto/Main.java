@@ -23,6 +23,10 @@
  */
 package com.clothcat.hpoolauto;
 
+import com.clothcat.hpoolauto.model.Investment;
+import com.clothcat.hpoolauto.model.Model;
+import com.clothcat.hpoolauto.model.Pool;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
@@ -100,17 +104,18 @@ public class Main {
         } catch (JSONException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
 
     private void processReceipt(JSONObject j) {
-
+        Model model = new Model();
         try {
             if (JsonDbHelper.isNewTransaction(j)) {
-                System.out.println("new transaction! "+j.getString("txid"));
-                String curPool = dw.getCurrPoolName();
-                long tgt_min = dw.getCurrPoolMinToFill();
-                long tgt_max = dw.getCurrPoolMaxToFill();
-                System.out.println("Pool Name: " + curPool + "\ttgt_min: "+tgt_min+"\ttgt_max: "+tgt_max);
+                System.out.println("new transaction! " + j.getString("txid"));
+                String curPool = model.getCurrPoolName();
+                long tgt_min = model.getMinFill();
+                long tgt_max = model.getMaxFill();
+                System.out.println("Pool Name: " + curPool + "\ttgt_min: " + tgt_min + "\ttgt_max: " + tgt_max);
                 // get the transaction for this receipt
                 String txid = j.getString("txid");
                 String s = rpcworker.getTransaction(txid);
@@ -121,16 +126,73 @@ public class Main {
 
                 String sendingAddress = vout.getJSONObject(0).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
                 String receivingAddress = vout.getJSONObject(1).getJSONObject("scriptPubKey").getJSONArray("addresses").getString(0);
-                String amount = vout.getJSONObject(1).getString("value");
-                double d = Double.valueOf(amount);
-                d*=1000000;
-                long l = (long) d;
-                System.out.println("Updating fill amount by addingh "+l+" to it.  We received "+amount);
-                dw.updateCurrPoolFill(l);
-                dw.markTransactionDone(j);
+                String amountStr = vout.getJSONObject(1).getString("value");
+                double d = Double.valueOf(amountStr);
+                d *= Constants.uH;
+                long amount = (long) d;
+
+                Pool p = model.getPool(model.getCurrPoolName());
+                long minSpace = model.getMinFill() - p.calculateFillAmount();
+                long maxSpace = model.getMaxFill() - p.calculateFillAmount();
+
+                if (amount < minSpace) {
+                    // investment fits in pool but does not fill it
+                    Investment inv = new Investment();
+                    inv.setAmount(amount);
+                    inv.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv.setFromAddress(sendingAddress);
+                    p.getInvestments().add(inv);
+                } else if (amount < maxSpace) {
+                    // investment fits in pool and fills it
+                    Investment inv = new Investment();
+                    inv.setAmount(amount);
+                    inv.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv.setFromAddress(sendingAddress);
+                    p.getInvestments().add(inv);
+                    model.moveToNextPool();
+                } else {
+                    // investment overflows pool, so fill it and then rollover
+                    // what's left as the first investment in the next pool.
+
+                    // we want to take a random amount of investment that
+                    // lets the pool size be between min and max, but which 
+                    // still leaves the investor enough for the minimum 
+                    // investment for the next pool.
+                    long maxInvAmount = amount - model.getMinInvestment();
+                    long minInvAmount = minSpace;
+
+                    long randomAmount = getRandomLongInRange(minInvAmount, maxInvAmount);
+                    long remainingAmount = amount - randomAmount;
+
+                    Investment inv = new Investment();
+                    inv.setAmount(randomAmount);
+                    inv.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv.setFromAddress(sendingAddress);
+                    p.getInvestments().add(inv);
+                    model.moveToNextPool();
+
+                    Pool p2 = model.getPool(model.getCurrPoolName());
+                    Investment inv2 = new Investment();
+                    inv2.setAmount(remainingAmount);
+                    inv2.setDatestamp(new java.util.Date().getTime() / 1000);
+                    inv2.setFromAddress(sendingAddress);
+                    p2.getInvestments().add(inv2);
+                }
+
+                model.setTransactionDone(txid);
             }
         } catch (JSONException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private long getRandomLongInRange(long from, long to) {
+        long range = to - from + 1;
+        long r = new Random().nextLong();
+        r %= range;
+        // we only produce positive values
+        r = Math.abs(r);
+        r += from;
+        return r;
     }
 }

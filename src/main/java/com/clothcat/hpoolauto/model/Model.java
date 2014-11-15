@@ -25,6 +25,7 @@ package com.clothcat.hpoolauto.model;
 
 import com.clothcat.hpoolauto.Constants;
 import com.clothcat.hpoolauto.JsonFileHelper;
+import com.clothcat.hpoolauto.RpcWorker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
  */
 public class Model {
 
+    RpcWorker rpcWorker = new RpcWorker();
     List<Pool> pools;
     private String currPoolName;
     private long minInvestment;
@@ -141,6 +143,15 @@ public class Model {
         this.currPoolName = currPoolName;
     }
 
+    public Pool getPool(String poolName) {
+        for (Pool p : pools) {
+            if (p.getPoolName().equals(poolName)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     public void saveJson() {
         JsonFileHelper.writeToFile(toJson(), "model.json");
     }
@@ -205,5 +216,36 @@ public class Model {
      */
     public void setMaxFill(long max_fill) {
         this.maxFill = max_fill;
+    }
+
+    public void moveToNextPool() {
+        Pool oldPool = getPool(getCurrPoolName());
+
+        // generate new pool name
+        // pool names are "poolN" where N is an incremebting number
+        int oldNumber = Integer.parseInt(getCurrPoolName().substring(4));
+        int newNumber = oldNumber + 1;
+        String newPoolName = "pool" + newNumber;
+
+        // set old pool status to maturing
+        oldPool.setStatus(PoolStatus.MATURING);
+
+        // generate a new address for the now full pool
+        String newAddress = rpcWorker.getNewAddress(newPoolName);
+        oldPool.setPoolAddress(newAddress);
+        
+        // xfer into the now full pool
+        rpcWorker.xferCoins("pool", newAddress, oldPool.calculateFillAmount());
+        // update webpages
+        HtmlGenerator.generateAll();
+        // set currentpool to new pool
+        setCurrPoolName(newPoolName);
+        // save all json
+        // TODO
+        TODO;
+    }
+
+    public void setTransactionDone(String txid) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

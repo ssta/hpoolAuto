@@ -39,8 +39,62 @@ import java.util.logging.Logger;
  */
 public class RpcWorker {
 
-    String[] cmdline = new String[]{"/home/hyp/.hyperpool/hyperstaked",
-        "-rpcport=20000"};
+    String[] cmdline = new String[]{"/home/hyp/.Hyperpool/wallet/hyperstaked",
+        "-rpcport=20000",
+        "-conf=/home/hyp/.Hyperpool/wallet/HyperStake.conf",
+        "-datadir=/home/hyp/.Hyperpool/wallet/"
+    };
+
+    // TODO -- for testing only! Remove me before release!
+    public static void main(String[] args) {
+        RpcWorker r = new RpcWorker();
+
+    }
+
+    /**
+     * Gets the address associated with the accountname passed. If no account of
+     * that name exists yet, then one will be created and a new address
+     * generated and associated with it.
+     */
+    public String getPoolAddress(String poolName) {
+        List<String> cmd = new ArrayList<>();
+        cmd.addAll(Arrays.asList(cmdline));
+        cmd.add("getaccountaddress");
+        cmd.add(poolName);
+        String s = runCommand(cmd);
+        return s;
+    }
+
+    /**
+     * Transfer amount coins from fromAccount to toAddress.
+     *
+     * Note amount is in uHyp and needs to be translated to Hyp.
+     */
+    public String xferCoins(String fromAccount, String toAddress, long amount) {
+        List<String> cmd = new ArrayList<>();
+        cmd.addAll(Arrays.asList(cmdline));
+        cmd.add("sendfrom");
+        cmd.add(fromAccount);
+        cmd.add(toAddress);
+        double a = amount / 1000000.0;
+        String as = Double.toString(a);
+        cmd.add(as);
+        String s = runCommand(cmd);
+        return s;
+    }
+
+    /**
+     * Get a new address and associate it with poolName
+     */
+    public String getNewAddress(String poolName) {
+        List<String> cmd = new ArrayList<>();
+        cmd.addAll(Arrays.asList(cmdline));
+        cmd.add("getnewaddress");
+        cmd.add(poolName);
+
+        String s = runCommand(cmd);
+        return s;
+    }
 
     /**
      * Run the rpc command checkwallet.
