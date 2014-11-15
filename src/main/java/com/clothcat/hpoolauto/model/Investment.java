@@ -39,7 +39,7 @@ public class Investment {
     private long datestamp; /* The timestamp of the transaction */
 
     private Investment() {
-        throw new UnsupportedOperationException("Use Pool(JsonObject) instead");
+        throw new UnsupportedOperationException("Use Investment(JsonObject) instead");
     }
 
     /**

@@ -23,15 +23,28 @@
  */
 package com.clothcat.hpoolauto;
 
+import com.clothcat.hpoolauto.model.TransactionList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  *
  * @author Stephen Stafford <clothcat@gmail.com>
  */
-public class Constants {
+public class JsonDbHelper {
 
-    public static final String FILE_BASE = System.getProperty("user.home") + "/.Hyperpool/";
-    public static final String JSON_FILEPATH = FILE_BASE + "json/";
-    public static final String HTML_FILEPATH = FILE_BASE + "html/";
-    public static final long uH = 1000000;
+    static boolean isNewTransaction(JSONObject j) {
+        boolean result = false;
+        try {
+            String txid = j.getString("txid");
+            TransactionList tl = new TransactionList();
+            result = tl.getTxids().contains(txid);
+        } catch (JSONException ex) {
+            Logger.getLogger(JsonDbHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+    }
 
 }

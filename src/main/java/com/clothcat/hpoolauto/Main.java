@@ -86,7 +86,6 @@ public class Main {
 
     private void processNewTx() {
         try {
-            DatabaseWorker dw = new DatabaseWorker();
             String s = rpcworker.getNextTransactions(POOL_ACCOUNT);
             //System.out.println(s);
             //System.out.println(s);
@@ -104,10 +103,9 @@ public class Main {
     }
 
     private void processReceipt(JSONObject j) {
-        DatabaseWorker dw = new DatabaseWorker();
 
         try {
-            if (dw.isNewTransaction(j)) {
+            if (JsonDbHelper.isNewTransaction(j)) {
                 System.out.println("new transaction! "+j.getString("txid"));
                 String curPool = dw.getCurrPoolName();
                 long tgt_min = dw.getCurrPoolMinToFill();

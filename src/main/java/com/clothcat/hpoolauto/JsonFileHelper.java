@@ -46,6 +46,10 @@ public class JsonFileHelper {
     public static JSONObject readFromFile(String filename) {
         try {
             File f = new File(Constants.JSON_FILEPATH + filename);
+            // if the file sn't there then return an empty JSONObject
+            if (!f.exists()) {
+                return new JSONObject();
+            }
             JSONArray ja = new JSONArray(new JSONTokener(new FileReader(f)));
             // the actual JSONObject we want is element 3 since there are three 
             // lines of comment that start the array

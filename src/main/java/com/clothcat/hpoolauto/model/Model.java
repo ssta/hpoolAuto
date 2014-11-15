@@ -23,7 +23,15 @@
  */
 package com.clothcat.hpoolauto.model;
 
+import com.clothcat.hpoolauto.Constants;
+import com.clothcat.hpoolauto.JsonFileHelper;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The Model consists of several pools in various stages.
@@ -34,23 +42,52 @@ import java.util.List;
  */
 public class Model {
 
-    private static Model instance;
     List<Pool> pools;
-    CurrentState currentState;
+    private String currPoolName;
+    private long minInvestment;
+    private long minFill;
+    private long maxFill;
 
-    static final String CURRENT_STATE_FILENAME = "currentState.json";
-
-    private Model() {
-
+    public Model() {
+        this(JsonFileHelper.readFromFile("model.json"));
     }
 
-    static Model getInstance() {
-        if (instance == null) {
-            instance = new Model();
+    public Model(JSONObject jo) {
+        try {
+            pools = new ArrayList<>();
+            if (jo.has("pools")) {
+                JSONArray parray = jo.getJSONArray("pools");
+                for (int i = 0; i < parray.length(); i++) {
+                    Pool p = new Pool(JsonFileHelper.readFromFile(parray.getString(i)));
+                    pools.add(p);
+                }
+            }
+
+            if (jo.has("minInvestment")) {
+                minInvestment = jo.getLong("minInvestment");
+            } else {
+                // default to 50HYP
+                minInvestment = 50 * Constants.uH;
+            }
+
+            if (jo.has("minFill")) {
+                minFill = jo.getLong("minFill");
+            } else {
+                // default to 3000 HYP
+                minFill = 3000 * Constants.uH;
+            }
+
+            if (jo.has("max_fill")) {
+                maxFill = jo.getLong("maxFill");
+            } else {
+                // default to 4000 HYP
+                maxFill = 4000 * Constants.uH;
+            }
+
+        } catch (JSONException ex) {
+            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return instance;
     }
-    /* Method skeletons for now */
 
     /**
      *
@@ -75,19 +112,98 @@ public class Model {
     public int getNumStakingPools() {
         return 2;
     }
-    
+
     /**
      * @return How many pools have staked and been paid out.
      */
-    public int getNumPoolsPaid(){
+    public int getNumPoolsPaid() {
         return 3;
     }
-    
+
     /**
      * @return How much profit we've made for investors thus far (in uHyp)
      */
-    public long getTotalProfit(){
+    public long getTotalProfit() {
         return 1234123400L;
     }
-    
+
+    /**
+     * @return the currPoolName
+     */
+    public String getCurrPoolName() {
+        return currPoolName;
+    }
+
+    /**
+     * @param currPoolName the currPoolName to set
+     */
+    public void setCurrPoolName(String currPoolName) {
+        this.currPoolName = currPoolName;
+    }
+
+    public void saveJson() {
+        JsonFileHelper.writeToFile(toJson(), "model.json");
+    }
+
+    public JSONObject toJson() {
+        JSONObject jo = new JSONObject();
+        try {
+            jo.put("currPoolName", getCurrPoolName());
+            jo.put("maxFill", getMaxFill());
+            jo.put("minFill", getMinFill());
+            jo.put("minInvestment", getMinInvestment());
+            JSONArray poolsArray = new JSONArray();
+            for (Pool p : pools) {
+                poolsArray.put(p.getPoolName());
+                // save the pool json while we're at it
+                JsonFileHelper.writeToFile(p.toJson(), p.getPoolName() + ".json");
+            }
+            jo.put("pools", poolsArray);
+        } catch (JSONException ex) {
+            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return jo;
+    }
+
+    /**
+     * @return the minInvestment
+     */
+    public long getMinInvestment() {
+        return minInvestment;
+    }
+
+    /**
+     * @param minInvestment the minInvestment to set
+     */
+    public void setMinInvestment(long minInvestment) {
+        this.minInvestment = minInvestment;
+    }
+
+    /**
+     * @return the minFill
+     */
+    public long getMinFill() {
+        return minFill;
+    }
+
+    /**
+     * @param min_fill the minFill to set
+     */
+    public void setMinFill(long min_fill) {
+        this.minFill = min_fill;
+    }
+
+    /**
+     * @return the maxFill
+     */
+    public long getMaxFill() {
+        return maxFill;
+    }
+
+    /**
+     * @param max_fill the maxFill to set
+     */
+    public void setMaxFill(long max_fill) {
+        this.maxFill = max_fill;
+    }
 }

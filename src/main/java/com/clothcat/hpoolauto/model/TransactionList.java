@@ -21,21 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.clothcat.hpoolauto.model;
 
-import java.util.List;
+import com.clothcat.hpoolauto.JsonFileHelper;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
+ * A list of transactions we have seen and processed.
  *
  * @author Stephen Stafford <clothcat@gmail.com>
  */
-class CurrentState {
-    /** The pools we're currently running.
-     * The data for each pool is in a file called &lt;poolName&gt;.json
+public class TransactionList {
+
+    private Set<String> txids;
+
+    public TransactionList() {
+        this(JsonFileHelper.readFromFile("transactions.json"));
+    }
+
+    public TransactionList(JSONObject jo) {
+        txids = new TreeSet<>();
+        try {
+            if (jo.has("txids")) {
+                JSONArray transactions = jo.getJSONArray("txids");
+                for (int i = 0; i < transactions.length(); i++) {
+                    txids.add(transactions.getString(i));
+                }
+            }
+        } catch (JSONException ex) {
+            Logger.getLogger(TransactionList.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * @return the txids
      */
-    List<String> pools;
-    
-    
-    
+    public Set<String> getTxids() {
+        return txids;
+    }
+
+    /**
+     * @param txids the txids to set
+     */
+    public void setTxids(Set<String> txids) {
+        this.txids = txids;
+    }
 }

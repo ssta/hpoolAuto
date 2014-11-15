@@ -95,22 +95,23 @@ public class HtmlGenerator {
     }
 
     private static void generateMaster() throws IOException {
+        Model model = new Model();
         String template = MASTER_HTML_TEMPLATE;
         // date generated
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm z yyyy/MM/dd");
         template = template.replace(PlaceholderStrings.DATE_GENERATED, sdf.format(new Date()));
         // number of filled pools
-        template = template.replace(PlaceholderStrings.NUM_FILLED_POOLS, String.valueOf(Model.getInstance().getNumFilledPools()));
+        template = template.replace(PlaceholderStrings.NUM_FILLED_POOLS, String.valueOf(model.getNumFilledPools()));
         // number of pools maturing
-        template = template.replace(PlaceholderStrings.NUM_POOLS_MATURING, String.valueOf(Model.getInstance().getNumMaturingPools()));
+        template = template.replace(PlaceholderStrings.NUM_POOLS_MATURING, String.valueOf(model.getNumMaturingPools()));
         // number of paid pools
-        template = template.replace(PlaceholderStrings.NUM_POOLS_PAID, String.valueOf(Model.getInstance().getNumPoolsPaid()));
+        template = template.replace(PlaceholderStrings.NUM_POOLS_PAID, String.valueOf(model.getNumPoolsPaid()));
         // number or pools staking
-        template = template.replace(PlaceholderStrings.NUM_POOLS_STAKING, String.valueOf(Model.getInstance().getNumStakingPools()));
+        template = template.replace(PlaceholderStrings.NUM_POOLS_STAKING, String.valueOf(model.getNumStakingPools()));
         // pools paid out
-        template = template.replace(PlaceholderStrings.NUM_POOLS_PAID, String.valueOf(Model.getInstance().getNumPoolsPaid()));
+        template = template.replace(PlaceholderStrings.NUM_POOLS_PAID, String.valueOf(model.getNumPoolsPaid()));
         // total profit
-        template = template.replace(PlaceholderStrings.TOTAL_PROFIT, String.valueOf(Model.getInstance().getTotalProfit() / 1000000));
+        template = template.replace(PlaceholderStrings.TOTAL_PROFIT, String.valueOf(model.getTotalProfit() / 1000000));
         // difficulty
         try {
             JSONObject diffJo = new JSONObject(new RpcWorker().getPosDifficulty());
