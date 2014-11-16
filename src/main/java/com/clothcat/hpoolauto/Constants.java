@@ -33,5 +33,6 @@ public class Constants {
     public static final String JSON_FILEPATH = FILE_BASE + "json/";
     public static final String HTML_FILEPATH = FILE_BASE + "html/";
     public static final long uH = 1000000;
+    public static final long XFER_FEE = 10;
 
 }

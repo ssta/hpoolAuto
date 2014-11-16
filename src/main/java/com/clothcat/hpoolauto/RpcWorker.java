@@ -143,7 +143,7 @@ public class RpcWorker {
 
     private String runCommand(List<String> command) {
         String s = "";
-
+        System.out.println("Running command: "+Arrays.toString(command.toArray()));
         try {
             ProcessBuilder ps = new ProcessBuilder(command);
             ps.redirectErrorStream(true);
@@ -159,6 +159,7 @@ public class RpcWorker {
         } catch (IOException | InterruptedException ex) {
             Logger.getLogger(RpcWorker.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println("Got response: \n"+s);
         return s;
     }
 }

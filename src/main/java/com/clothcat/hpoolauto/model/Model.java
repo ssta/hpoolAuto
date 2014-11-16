@@ -85,7 +85,7 @@ public class Model {
                 minFill = 3000 * Constants.uH;
             }
 
-            if (jo.has("max_fill")) {
+            if (jo.has("maxFill")) {
                 maxFill = jo.getLong("maxFill");
             } else {
                 // default to 4000 HYP
@@ -205,7 +205,16 @@ public class Model {
                 JSONObject jo = ja.getJSONObject(i);
                 //System.out.println(jo.toString());
                 if (jo.getString("category").equals("receive")) {
-                    processReceipt(jo);
+                    // make sure the transaction is old enough (10 minutes)
+                    // this time delay is to allow enough time for the transaction
+                    // to be verified
+                    // This mechanism may change in the future… 
+                    long now = System.currentTimeMillis() / 1000; // current time in seconds since the epoch
+                    long txtime = jo.getLong("timereceived");
+                    long TENMINUTES = 600; // in seconds
+                    if (now > (txtime + TENMINUTES)) {
+                        processReceipt(jo);
+                    }
                 }
             }
         } catch (JSONException ex) {
@@ -340,6 +349,7 @@ public class Model {
         JSONObject jo = new JSONObject();
         try {
             jo.put("currPoolName", getCurrPoolName());
+            jo.put("poolAddress", getPoolAddress());
             jo.put("maxFill", getMaxFill());
             jo.put("minFill", getMinFill());
             jo.put("minInvestment", getMinInvestment());
@@ -408,12 +418,16 @@ public class Model {
         // set old pool status to maturing
         oldPool.setStatus(PoolStatus.MATURING);
 
-        // generate a new address for the now full pool
-        String newAddress = rpcWorker.getNewAddress(newPoolName);
-        oldPool.setPoolAddress(newAddress);
+        // address for the current pool we're creating
+        String oldAddress = oldPool.getPoolAddress();
+        if (oldAddress == null || "".equals(oldAddress)) {
+            oldAddress = rpcWorker.getPoolAddress(oldPool.getPoolName());
+            oldPool.setPoolAddress(oldAddress);
+        }
 
+        System.out.println("amount==" + oldPool.calculateFillAmount());
         // xfer into the now full pool
-        rpcWorker.xferCoins("pool", newAddress, oldPool.calculateFillAmount());
+        rpcWorker.xferCoins("pool", oldAddress, oldPool.calculateFillAmount() - Constants.XFER_FEE);
 
         // set currentpool to new pool
         setCurrPoolName(newPoolName);
@@ -425,5 +439,19 @@ public class Model {
     public void setTransactionDone(String txid) {
         transactions.getTxids().add(txid);
         transactions.saveTransactions();
+    }
+
+    /**
+     * @return the poolAddress
+     */
+    public String getPoolAddress() {
+        return poolAddress;
+    }
+
+    /**
+     * @param poolAddress the poolAddress to set
+     */
+    public void setPoolAddress(String poolAddress) {
+        this.poolAddress = poolAddress;
     }
 }
