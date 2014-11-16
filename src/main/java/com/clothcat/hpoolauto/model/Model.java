@@ -428,7 +428,8 @@ public class Model {
         System.out.println("amount==" + oldPool.calculateFillAmount());
         // xfer into the now full pool
         rpcWorker.xferCoins("pool", oldAddress, oldPool.calculateFillAmount() - Constants.XFER_FEE);
-
+        // set the timestamp the pool was started
+        oldPool.setStartTimestamp(System.currentTimeMillis());
         // set currentpool to new pool
         setCurrPoolName(newPoolName);
 
