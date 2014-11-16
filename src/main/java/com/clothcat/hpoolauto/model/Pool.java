@@ -190,12 +190,11 @@ public class Pool {
     public long calculatePotentialStake() {
         long MAXSTAKE = (1000 * 1000000);
         long blocksize = calculateFillAmount();
-        long days = getPoolAge() / 1000 / 3600 / 24;
+        double days = ((double)getPoolAge()) / 1000 / 3600 / 24;
         long potStake = (long) ((7.5 / 365) * days * blocksize);
         if (potStake > MAXSTAKE) {
             potStake = MAXSTAKE;
         }
-        
         return potStake;
     }
 

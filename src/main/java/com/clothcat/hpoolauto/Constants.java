@@ -34,5 +34,8 @@ public class Constants {
     public static final String HTML_FILEPATH = FILE_BASE + "html/";
     public static final long uH = 1000000;
     public static final long XFER_FEE = 10;
+    public static final long SECS_IN_MINUTE = 60;
+    public static final long SECS_IN_HOUR = 60 * SECS_IN_MINUTE;
+    public static final long SECS_IN_DAY = 24 * SECS_IN_HOUR;
 
 }
