@@ -30,58 +30,54 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
- * @author hyp
+ * Main entry point for the HAT application.
  */
 public class Main {
 
-    RpcWorker rpcworker = new RpcWorker();
-    Model model = new Model();
+  RpcWorker rpcworker = new RpcWorker();
+  Model model = new Model();
 
-    public static void main(String[] args) {
-        Main m = new Main();
-        m.launch();
+  public static void main(String[] args) {
+    Main m = new Main();
+    m.launch();
+  }
+
+  private void checkHyperstakedRunning() {
+    try {
+      HLogger.log(Level.FINEST, "checking wallet status");
+      String s = rpcworker.checkwallet();
+      HLogger.log(Level.FINEST, "Status returned: " + s);
+      JSONObject j = new JSONObject(s);
+      boolean pass = j.getBoolean("wallet check passed");
+      if (pass) {
+        HLogger.log(Level.FINEST, "Wallet status check passed");
+      } else {
+        HLogger.log(Level.SEVERE, "FAiled wallet status check!");
+      }
+    } catch (JSONException ex) {
+      Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
     }
+  }
 
-    private void checkHyperstakedRunning() {
-        try {
-            String s = rpcworker.checkwallet();
-            debug(s);
-            JSONObject j = new JSONObject(s);
-            boolean pass = j.getBoolean("wallet check passed");
+  private void launch() {
+    // currently all we do is go into the main loop
+    mainLoop();
+  }
 
-            if (!pass) {
-                System.out.println("Problem!");
-            }
-        } catch (JSONException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+  private void mainLoop() {
+    while (true) {
+      // make sure hyperstaked is running
+      checkHyperstakedRunning();
+      // get and process any new transactions
+      model.processNewTx();
+      // save the model
+      model.updateAndSave();
+      // sleep for 30 seconds    
+      try {
+        Thread.sleep(30000);
+      } catch (InterruptedException ex) {
+        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }
-
-    private void launch() {
-        // currently all we do is go into the main loop
-        mainLoop();
-    }
-
-    private void mainLoop() {
-        while (true) {
-            // make sure hyperstaked is running
-            checkHyperstakedRunning();
-            // get and process any new transactions
-            model.processNewTx();
-            // save the model
-            model.updateAndSave();
-            // sleep for 30 seconds    
-            try {
-                Thread.sleep(30000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    private void debug(String s) {
-        System.out.println(String.valueOf(System.currentTimeMillis()) + "::" + s);
-    }
-
+  }
 }

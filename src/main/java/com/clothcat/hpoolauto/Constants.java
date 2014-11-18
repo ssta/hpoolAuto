@@ -29,13 +29,41 @@ package com.clothcat.hpoolauto;
  */
 public class Constants {
 
-    public static final String FILE_BASE = System.getProperty("user.home") + "/.Hyperpool/";
-    public static final String JSON_FILEPATH = FILE_BASE + "json/";
-    public static final String HTML_FILEPATH = FILE_BASE + "html/";
-    public static final long uH = 1000000;
-    public static final long XFER_FEE = 10;
-    public static final long SECS_IN_MINUTE = 60;
-    public static final long SECS_IN_HOUR = 60 * SECS_IN_MINUTE;
-    public static final long SECS_IN_DAY = 24 * SECS_IN_HOUR;
+  public static final String APPNAME = "Hyperpool";
+
+  /**
+   * The base directory where we store everything for Hyperpool
+   */
+  public static final String FILE_BASE = System.getProperty("user.home")
+      + "/.Hyperpool/";
+
+  /**
+   * Where we store our json files
+   */
+  public static final String JSON_FILEPATH = FILE_BASE + "json/";
+
+  /**
+   * Where we store HTML files
+   */
+  public static final String HTML_FILEPATH = FILE_BASE + "html/";
+
+  /**
+   * Will generates log files called
+   * <pre>Hyperpool_n.log</pre> where n is a rotating digit
+   */
+  public static final String LOGGFILE_PATTERN = FILE_BASE + APPNAME + "_%g.log";
+
+  /**
+   * How many microHyp there is in one Hyp
+   */
+  public static final long uH_IN_HYP = 1000000;
+  /**
+   * The transfer fee (in uHyp)
+   */
+  public static final long XFER_FEE = 10;
+  public static final long SECS_IN_MINUTE = 60;
+  public static final long SECS_IN_HOUR = 60 * SECS_IN_MINUTE;
+  public static final long SECS_IN_DAY = 24 * SECS_IN_HOUR;
+  public static final int MEBIBYTES = 1024 * 1024;
 
 }

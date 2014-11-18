@@ -28,33 +28,35 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 /**
- *
- * @author hyp
+ * This is a hack. The JSON standard allows duplicate keys. Many other
+ * implementations do also. org.json do not. Since there are occasional json
+ * strings returned from RPC that have duplicates, we have this hack to allow
+ * them.
  */
 public class JSONObjectDuplicates extends JSONObject {
 
-    public JSONObjectDuplicates(JSONTokener jt) throws JSONException {
-        super(jt);
-    }
+  public JSONObjectDuplicates(JSONTokener jt) throws JSONException {
+    super(jt);
+  }
 
-    /**
-     * Put a key/value pair in the JSONObject, but only if the key and the value
-     * are both non-null. Allows duplicated keys, but overwrites the data that
-     * was there under the key already.
-     *
-     * @param key
-     * @param value
-     * @return his.
-     * @throws JSONException
-     *
-     */
-    @Override
-    public JSONObject putOnce(String key, Object value) throws JSONException {
-        if (key != null && value != null) {
+  /**
+   * Put a key/value pair in the JSONObject, but only if the key and the value
+   * are both non-null. Allows duplicated keys, but overwrites the data that was
+   * there under the key already.
+   *
+   * @param key
+   * @param value
+   * @return his.
+   * @throws JSONException
+   *
+   */
+  @Override
+  public JSONObject putOnce(String key, Object value) throws JSONException {
+    if (key != null && value != null) {
 
-            this.put(key, value);
-        }
-        return this;
+      this.put(key, value);
     }
+    return this;
+  }
 
 }
