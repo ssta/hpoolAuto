@@ -66,4 +66,11 @@ public class Constants {
   public static final long SECS_IN_DAY = 24 * SECS_IN_HOUR;
   public static final int MEBIBYTES = 1024 * 1024;
 
+  /* FTP details at byethost */
+  public static final String FTP_HOSTNAME="ftp.byethost11.com";
+  public static final String FTP_USERNAME="b11_15559137";
+  public static final String FTP_PASSWORD="tqNUz6o.1vE2";
+  
+  
+  
 }

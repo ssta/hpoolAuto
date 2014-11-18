@@ -25,6 +25,7 @@ package com.clothcat.hpoolauto;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -42,6 +43,13 @@ public class HLogger {
 
   private HLogger() {
     try {
+      // disable the console logger completely
+      Logger globalLogger = Logger.getLogger("global");
+      Handler[] handlers = globalLogger.getHandlers();
+      for (Handler handler : handlers) {
+        globalLogger.removeHandler(handler);
+      }
+
       /* set the format property
        * format string stolen from SimpleFormatter API docs:
        * This prints 2 lines where the first line includes the timestamp 
@@ -62,7 +70,7 @@ public class HLogger {
       // debugging stuff not needed normally
       fileHandler.setLevel(Level.ALL);
       logger.addHandler(fileHandler);
-      
+
       logger.info("Constructed new HLogger.");
     } catch (IOException | SecurityException ex) {
       Logger.getLogger(HLogger.class.getName()).log(Level.SEVERE, null,

@@ -72,9 +72,11 @@ public class Main {
       model.processNewTx();
       // save the model
       model.updateAndSave();
-      // sleep for 30 seconds    
+      // upload html
+      HtmlUploader.uploadHtml();
+      // sleep for 3 minutes    
       try {
-        Thread.sleep(30000);
+        Thread.sleep(3 * 1000 * 60);
       } catch (InterruptedException ex) {
         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
       }
