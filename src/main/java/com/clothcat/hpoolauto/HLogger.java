@@ -52,15 +52,17 @@ public class HLogger {
           "java.util.logging.SimpleFormatter.format",
           "%1$tc %2$s%n%4$s: %5$s%6$s%n");
 
-            // set the logging level to ALL - this may change later to remove
-      // debugging stuff not needed normally
-      fileHandler.setLevel(Level.ALL);
-
       logger = Logger.getLogger("HLogger");
       fileHandler = new FileHandler(Constants.LOGGFILE_PATTERN,
           5 * Constants.MEBIBYTES, 3, true);
       SimpleFormatter format = new SimpleFormatter();
       fileHandler.setFormatter(format);
+
+      // set the logging level to ALL - this may change later to remove
+      // debugging stuff not needed normally
+      fileHandler.setLevel(Level.ALL);
+      logger.addHandler(fileHandler);
+      
       logger.info("Constructed new HLogger.");
     } catch (IOException | SecurityException ex) {
       Logger.getLogger(HLogger.class.getName()).log(Level.SEVERE, null,
@@ -88,6 +90,7 @@ public class HLogger {
 
   public static void log(Level level, String message, Throwable t) {
     getInstance().logger.log(level, message, t);
+    getInstance().fileHandler.flush();
   }
 
 }
