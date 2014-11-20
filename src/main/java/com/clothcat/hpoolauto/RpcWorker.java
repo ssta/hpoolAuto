@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  *
  */
 public class RpcWorker {
-  
+
   String[] cmdline = new String[]{"/home/hyp/.Hyperpool/wallet/hyperstaked",
     "-rpcport=20000",
     "-conf=/home/hyp/.Hyperpool/wallet/HyperStake.conf",
@@ -48,7 +48,7 @@ public class RpcWorker {
   // TODO -- for testing only! Remove me before release!
   public static void main(String[] args) {
     RpcWorker r = new RpcWorker();
-    
+    System.out.println(r.isOurAddress("pUKmL3JoMyL5aKPvtdfap8fxAoKeYZKvsj"));
   }
 
   /**
@@ -92,7 +92,7 @@ public class RpcWorker {
     cmd.addAll(Arrays.asList(cmdline));
     cmd.add("getnewaddress");
     cmd.add(poolName);
-    
+
     String s = runCommand(cmd);
     return s;
   }
@@ -106,16 +106,16 @@ public class RpcWorker {
     List<String> cmd = new ArrayList<>();
     cmd.addAll(Arrays.asList(cmdline));
     cmd.add("checkwallet");
-    
+
     return runCommand(cmd);
   }
-  
+
   public String getTransaction(String txid) {
     List<String> cmd = new ArrayList<>();
     cmd.addAll(Arrays.asList(cmdline));
     cmd.add("gettransaction");
     cmd.add(txid);
-    
+
     return runCommand(cmd);
   }
 
@@ -129,18 +129,31 @@ public class RpcWorker {
     cmd.add(account);
     cmd.add("20");
     cmd.add(String.valueOf(0));
-    
+
     return runCommand(cmd);
   }
-  
+
   public String getPosDifficulty() {
     List<String> cmd = new ArrayList<>();
     cmd.addAll(Arrays.asList(cmdline));
     cmd.add("getdifficulty");
-    
+
     return runCommand(cmd);
   }
-  
+
+  public boolean isOurAddress(String address) {
+    List<String> cmd = new ArrayList<>();
+    cmd.addAll(Arrays.asList(cmdline));
+    cmd.add("getaccount");
+    cmd.add(address);
+    String s = runCommand(cmd);
+    s = s.trim();
+    if (s.startsWith("error")) {
+      return false;
+    }
+    return (!"".equals(s));
+  }
+
   private String runCommand(List<String> command) {
     String s = "";
     HLogger.log(Level.FINEST, "Running RPC command: \n" + Arrays.toString(command.toArray()));

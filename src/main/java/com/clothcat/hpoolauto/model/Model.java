@@ -141,83 +141,88 @@ public class Model {
         String sendingAddress = vout.getJSONObject(0).
             getJSONObject("scriptPubKey").
             getJSONArray("addresses").getString(0);
-        HLogger.log(Level.FINEST, "Extraced sending address: "
+        HLogger.log(Level.FINEST, "Extracted sending address: "
             + sendingAddress);
-        String receivingAddress = vout.getJSONObject(1).
-            getJSONObject("scriptPubKey").
-            getJSONArray("addresses").getString(0);
-        HLogger.log(Level.FINEST, "Extracted receiving address: "
-            + receivingAddress);
-        String amountStr = vout.getJSONObject(1).getString("value");
-        HLogger.log(Level.FINEST, "Extracted amount: " + amountStr);
-        double d = Double.valueOf(amountStr);
-        d *= Constants.uH_IN_HYP;
-        long amount = (long) d;
-        HLogger.log(Level.FINEST, "Amount in uHyp is: " + d);
-
-        Pool p = getPool(getCurrPoolName());
-        long minSpace = getMinFill() - p.calculateFillAmount();
-        long maxSpace = getMaxFill() - p.calculateFillAmount();
-        HLogger.log(Level.FINEST, "minSpace: " + minSpace + "; maxSpace: " + maxSpace);
-
-        if (amount < minSpace) {
-          // investment fits in pool but does not fill it
-          HLogger.log(Level.FINE, "amount < minSpace");
-          Investment inv = new Investment();
-          inv.setAmount(amount);
-          inv.setDatestamp(new java.util.Date().getTime() / 1000);
-          inv.setFromAddress(sendingAddress);
-          p.getInvestments().add(inv);
-          HLogger.log(Level.FINE, "added investment to pool: \n" + inv.toJson());
-        } else if (amount < maxSpace) {
-          // investment fits in pool and fills it
-          HLogger.log(Level.FINE, "amount < maxSpace");
-          Investment inv = new Investment();
-          inv.setAmount(amount);
-          inv.setDatestamp(new java.util.Date().getTime() / 1000);
-          inv.setFromAddress(sendingAddress);
-          p.getInvestments().add(inv);
-          HLogger.log(Level.FINE, "added investment to pool: \n" + inv.toJson());
-          HLogger.log(Level.FINE, "Moving to next pool");
-          moveToNextPool();
+        // see if the sending address belongs to us
+        if (rpcWorker.isOurAddress(sendingAddress)) {
+          HLogger.log(Level.FINEST, "sending address belongs to us, ignoring "
+              + "transaction");
         } else {
-          HLogger.log(Level.FINE, "amount > minSpace");
+          String receivingAddress = vout.getJSONObject(1).
+              getJSONObject("scriptPubKey").
+              getJSONArray("addresses").getString(0);
+          HLogger.log(Level.FINEST, "Extracted receiving address: "
+              + receivingAddress);
+          String amountStr = vout.getJSONObject(1).getString("value");
+          HLogger.log(Level.FINEST, "Extracted amount: " + amountStr);
+          double d = Double.valueOf(amountStr);
+          d *= Constants.uH_IN_HYP;
+          long amount = (long) d;
+          HLogger.log(Level.FINEST, "Amount in uHyp is: " + d);
+
+          Pool p = getPool(getCurrPoolName());
+          long minSpace = getMinFill() - p.calculateFillAmount();
+          long maxSpace = getMaxFill() - p.calculateFillAmount();
+          HLogger.log(Level.FINEST, "minSpace: " + minSpace + "; maxSpace: " + maxSpace);
+
+          if (amount < minSpace) {
+            // investment fits in pool but does not fill it
+            HLogger.log(Level.FINE, "amount < minSpace");
+            Investment inv = new Investment();
+            inv.setAmount(amount);
+            inv.setDatestamp(new java.util.Date().getTime() / 1000);
+            inv.setFromAddress(sendingAddress);
+            p.getInvestments().add(inv);
+            HLogger.log(Level.FINE, "added investment to pool: \n" + inv.toJson());
+          } else if (amount < maxSpace) {
+            // investment fits in pool and fills it
+            HLogger.log(Level.FINE, "amount < maxSpace");
+            Investment inv = new Investment();
+            inv.setAmount(amount);
+            inv.setDatestamp(new java.util.Date().getTime() / 1000);
+            inv.setFromAddress(sendingAddress);
+            p.getInvestments().add(inv);
+            HLogger.log(Level.FINE, "added investment to pool: \n" + inv.toJson());
+            HLogger.log(Level.FINE, "Moving to next pool");
+            moveToNextPool();
+          } else {
+            HLogger.log(Level.FINE, "amount > minSpace");
           // investment overflows pool, so fill it and then rollover
-          // what's left as the first investment in the next pool.
+            // what's left as the first investment in the next pool.
 
-          // we want to take a random amount of investment that
-          // lets the pool size be between min and max, but which 
-          // still leaves the investor enough for the minimum 
-          // investment for the next pool.
-          long maxInvAmount = minOf(amount - getMinInvestment(), 1000);
-          HLogger.log(Level.FINE, "maxInvAmount: " + maxInvAmount);
-          long minInvAmount = minSpace;
-          HLogger.log(Level.FINE, "minInvAmount: " + minInvAmount);
+            // we want to take a random amount of investment that
+            // lets the pool size be between min and max, but which 
+            // still leaves the investor enough for the minimum 
+            // investment for the next pool.
+            long maxInvAmount = minOf(amount - getMinInvestment(), 1000);
+            HLogger.log(Level.FINE, "maxInvAmount: " + maxInvAmount);
+            long minInvAmount = minSpace;
+            HLogger.log(Level.FINE, "minInvAmount: " + minInvAmount);
 
-          long randomAmount = getRandomLongInRange(minInvAmount, maxInvAmount);
-          HLogger.log(Level.FINE, "randomAmount: " + randomAmount);
-          long remainingAmount = amount - randomAmount;
-          HLogger.log(Level.FINE, "remainingAmount: " + remainingAmount);
+            long randomAmount = getRandomLongInRange(minInvAmount, maxInvAmount);
+            HLogger.log(Level.FINE, "randomAmount: " + randomAmount);
+            long remainingAmount = amount - randomAmount;
+            HLogger.log(Level.FINE, "remainingAmount: " + remainingAmount);
 
-          Investment inv = new Investment();
-          inv.setAmount(randomAmount);
-          inv.setDatestamp(new java.util.Date().getTime() / 1000);
-          inv.setFromAddress(sendingAddress);
-          p.getInvestments().add(inv);
-          HLogger.log(Level.FINE, "added investment to pool: \n" + inv.toJson());
-          HLogger.log(Level.FINE, "moving to next pool with remaining amount");
-          moveToNextPool();
+            Investment inv = new Investment();
+            inv.setAmount(randomAmount);
+            inv.setDatestamp(new java.util.Date().getTime() / 1000);
+            inv.setFromAddress(sendingAddress);
+            p.getInvestments().add(inv);
+            HLogger.log(Level.FINE, "added investment to pool: \n" + inv.toJson());
+            HLogger.log(Level.FINE, "moving to next pool with remaining amount");
+            moveToNextPool();
 
-          Pool p2 = getPool(getCurrPoolName());
-          Investment inv2 = new Investment();
-          inv2.setAmount(remainingAmount);
-          inv2.setDatestamp(new java.util.Date().getTime() / 1000);
-          inv2.setFromAddress(sendingAddress);
-          p2.getInvestments().add(inv2);
-          HLogger.log(Level.FINE, "added investment to new pool: "
-              + p2.getPoolName() + "\n" + inv.toJson());
+            Pool p2 = getPool(getCurrPoolName());
+            Investment inv2 = new Investment();
+            inv2.setAmount(remainingAmount);
+            inv2.setDatestamp(new java.util.Date().getTime() / 1000);
+            inv2.setFromAddress(sendingAddress);
+            p2.getInvestments().add(inv2);
+            HLogger.log(Level.FINE, "added investment to new pool: "
+                + p2.getPoolName() + "\n" + inv.toJson());
+          }
         }
-
         HLogger.log(Level.FINE, "Marking txid as done: " + txid);
         setTransactionDone(txid);
       }
@@ -360,6 +365,8 @@ public class Model {
    * Return the next pool name. Each pool is named "poolNNN" where NNN is an
    * incrementing integer. We look at the current pool name "poolNNN" and return
    * "poolNNN+1"
+   *
+   * @return the name of the next pool.
    */
   public String getNextPoolName() {
     String cur = getCurrPoolName();
