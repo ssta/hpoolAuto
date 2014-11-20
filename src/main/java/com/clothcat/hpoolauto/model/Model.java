@@ -189,7 +189,7 @@ public class Model {
           // lets the pool size be between min and max, but which 
           // still leaves the investor enough for the minimum 
           // investment for the next pool.
-          long maxInvAmount = amount - getMinInvestment();
+          long maxInvAmount = minOf(amount - getMinInvestment(), 1000);
           HLogger.log(Level.FINE, "maxInvAmount: " + maxInvAmount);
           long minInvAmount = minSpace;
           HLogger.log(Level.FINE, "minInvAmount: " + minInvAmount);
@@ -500,15 +500,15 @@ public class Model {
     HLogger.log(Level.FINEST, "amount: " + oldPool.calculateFillAmount());
     HLogger.log(Level.FINEST, "fee: " + Constants.XFER_FEE);
     // xfer into the now full pool
-    rpcWorker.xferCoins("pool", oldAddress, oldPool.calculateFillAmount() -
-        Constants.XFER_FEE);
+    rpcWorker.xferCoins("pool", oldAddress, oldPool.calculateFillAmount()
+        - Constants.XFER_FEE);
     // set the timestamp the pool was started
     long t = System.currentTimeMillis();
     oldPool.setStartTimestamp(t);
     HLogger.log(Level.FINEST, "set startTimestamp to: " + t);
     // set currentpool to new pool
     setCurrPoolName(newPoolName);
-    HLogger.log(Level.FINEST, "Switched currPoolName to: "+getCurrPoolName());
+    HLogger.log(Level.FINEST, "Switched currPoolName to: " + getCurrPoolName());
 
     // update and save all
     HLogger.log(Level.FINEST, "calling updateAndSave()");
@@ -519,7 +519,7 @@ public class Model {
     HLogger.log(Level.FINEST, "in setTransactionDone()");
     transactions.getTxids().add(txid);
     transactions.saveTransactions();
-    HLogger.log(Level.FINEST, "marked txid "+txid+" done");
+    HLogger.log(Level.FINEST, "marked txid " + txid + " done");
   }
 
   /**
@@ -534,5 +534,9 @@ public class Model {
    */
   public void setPoolAddress(String poolAddress) {
     this.poolAddress = poolAddress;
+  }
+
+  private long minOf(long x, long y) {
+    return (y > x) ? x : y;
   }
 }
